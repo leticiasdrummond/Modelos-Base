@@ -1,0 +1,755 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa Mental - Otimização Gurobi</title>
+    <style>
+        :root {
+            --color-bg-base: #0f172a;
+            --color-bg-elevated: #1e293b;
+            --color-bg-surface: #334155;
+            --color-text-primary: #f1f5f9;
+            --color-text-secondary: #cbd5e1;
+            --color-text-muted: #94a3b8;
+            --color-primary: #38bdf8;
+            --color-accent-1: #22d3ee;
+            --color-accent-2: #818cf8;
+            --color-accent-3: #a78bfa;
+            --color-accent-4: #fb923c;
+            --color-accent-5: #f472b6;
+            --color-accent-6: #4ade80;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+            background: var(--color-bg-base);
+            color: var(--color-text-primary);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        #container {
+            width: 100%;
+            height: 100vh;
+            position: relative;
+            overflow: hidden;
+            cursor: grab;
+        }
+
+        #container.grabbing {
+            cursor: grabbing;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform-origin: center center;
+        }
+
+        .node {
+            position: absolute;
+            padding: 16px 24px;
+            border-radius: 12px;
+            background: var(--color-bg-elevated);
+            border: 2px solid;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            transform: translate(-50%, -50%);
+            min-width: 180px;
+            text-align: center;
+        }
+
+        .node:hover {
+            transform: translate(-50%, -50%) scale(1.05);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        .node.central {
+            padding: 24px 36px;
+            font-size: 20px;
+            font-weight: 700;
+            border-width: 3px;
+            min-width: 240px;
+            background: linear-gradient(135deg, var(--color-bg-elevated) 0%, var(--color-bg-surface) 100%);
+        }
+
+        .node.level-1 {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .node.level-2 {
+            font-size: 14px;
+            padding: 12px 18px;
+            min-width: 160px;
+        }
+
+        .node.level-3 {
+            font-size: 13px;
+            padding: 10px 16px;
+            min-width: 140px;
+            background: var(--color-bg-surface);
+        }
+
+        .connection {
+            position: absolute;
+            height: 2px;
+            background: var(--color-text-muted);
+            transform-origin: left center;
+            pointer-events: none;
+            opacity: 0.4;
+            transition: opacity 0.3s ease;
+        }
+
+        .node:hover ~ .connection,
+        .connection.active {
+            opacity: 0.8;
+        }
+
+        .color-primary { border-color: var(--color-primary); }
+        .color-accent-1 { border-color: var(--color-accent-1); }
+        .color-accent-2 { border-color: var(--color-accent-2); }
+        .color-accent-3 { border-color: var(--color-accent-3); }
+        .color-accent-4 { border-color: var(--color-accent-4); }
+        .color-accent-5 { border-color: var(--color-accent-5); }
+        .color-accent-6 { border-color: var(--color-accent-6); }
+
+        #controls {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .btn {
+            padding: 10px 16px;
+            background: var(--color-bg-elevated);
+            border: 1px solid var(--color-text-muted);
+            border-radius: 8px;
+            color: var(--color-text-primary);
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .btn:hover {
+            background: var(--color-bg-surface);
+            border-color: var(--color-primary);
+        }
+
+        #info {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: var(--color-bg-elevated);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--color-text-muted);
+            max-width: 400px;
+            display: none;
+        }
+
+        #info.active {
+            display: block;
+        }
+
+        #info h3 {
+            color: var(--color-primary);
+            margin-bottom: 8px;
+            font-size: 16px;
+        }
+
+        #info p {
+            color: var(--color-text-secondary);
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .legend {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: var(--color-bg-elevated);
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--color-text-muted);
+            font-size: 12px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 12px;
+            border-radius: 3px;
+            border: 2px solid;
+        }
+    </style>
+</head>
+<body>
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color color-primary"></div>
+            <span>Conceito Central</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color color-accent-1"></div>
+            <span>Estrutura Repositório</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color color-accent-2"></div>
+            <span>Objetos Modelagem</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color color-accent-3"></div>
+            <span>Evolução Complexidade</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color color-accent-4"></div>
+            <span>Conceitos Teóricos</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color color-accent-5"></div>
+            <span>Casos Reais</span>
+        </div>
+    </div>
+
+    <div id="controls">
+        <button class="btn" onclick="resetView()">Resetar Zoom</button>
+        <button class="btn" onclick="toggleInfo()">Info</button>
+    </div>
+
+    <div id="info">
+        <h3>Navegação</h3>
+        <p>• Arraste para mover o mapa<br>
+        • Role para zoom in/out<br>
+        • Clique nos nós para detalhes<br>
+        • Navegue pelos conceitos interconectados</p>
+    </div>
+
+    <div id="container">
+        <div id="canvas"></div>
+    </div>
+
+    <script>
+        const nodes = [
+            // Central
+            {
+                id: 'central',
+                text: 'Otimização Gurobi<br>Energia & Utilities',
+                x: 0,
+                y: 0,
+                level: 'central',
+                color: 'primary',
+                info: 'Repositório de exemplos de modelagem de otimização matemática aplicada a sistemas de energia renovável, armazenamento e gestão de eletricidade.'
+            },
+
+            // Estrutura Repositório
+            {
+                id: 'repo1',
+                text: 'Optimization 101',
+                x: -400,
+                y: -250,
+                level: 'level-1',
+                color: 'accent-1',
+                parent: 'central',
+                info: 'Conceitos introdutórios de programação linear e inteira.'
+            },
+            {
+                id: 'repo2',
+                text: 'Optimization 201',
+                x: -400,
+                y: -150,
+                level: 'level-1',
+                color: 'accent-1',
+                parent: 'central',
+                info: 'Modelagem intermediária: energia renovável, baterias, multi-objetivo.'
+            },
+            {
+                id: 'repo3',
+                text: 'Optimization 202',
+                x: -400,
+                y: -50,
+                level: 'level-1',
+                color: 'accent-1',
+                parent: 'central',
+                info: 'Técnicas avançadas: otimização não-linear, PWL, incerteza.'
+            },
+            {
+                id: 'repo4',
+                text: 'Arquivos .ipynb',
+                x: -620,
+                y: -150,
+                level: 'level-2',
+                color: 'accent-1',
+                parent: 'repo2',
+                info: 'Notebooks Jupyter com código Python + Gurobi API.'
+            },
+            {
+                id: 'repo5',
+                text: 'READMEs',
+                x: -620,
+                y: -100,
+                level: 'level-2',
+                color: 'accent-1',
+                parent: 'repo2',
+                info: 'Documentação por seção explicando objetivos e métodos.'
+            },
+
+            // Objetos de Modelagem
+            {
+                id: 'obj1',
+                text: 'Variáveis Decisão',
+                x: -150,
+                y: -300,
+                level: 'level-1',
+                color: 'accent-2',
+                parent: 'central',
+                info: 'Elementos que o otimizador decide: quanto carregar/descarregar bateria, quanto comprar da rede.'
+            },
+            {
+                id: 'obj2',
+                text: 'flowin(b,t)',
+                x: -150,
+                y: -420,
+                level: 'level-2',
+                color: 'accent-2',
+                parent: 'obj1',
+                info: 'Quantidade de energia para carregar bateria b no tempo t.'
+            },
+            {
+                id: 'obj3',
+                text: 'flowout(b,t)',
+                x: -50,
+                y: -420,
+                level: 'level-2',
+                color: 'accent-2',
+                parent: 'obj1',
+                info: 'Quantidade de energia descarregada da bateria b no tempo t.'
+            },
+            {
+                id: 'obj4',
+                text: 'grid(t)',
+                x: -280,
+                y: -420,
+                level: 'level-2',
+                color: 'accent-2',
+                parent: 'obj1',
+                info: 'Eletricidade comprada da rede no tempo t.'
+            },
+            {
+                id: 'obj5',
+                text: 'state(b,t)',
+                x: -280,
+                y: -380,
+                level: 'level-2',
+                color: 'accent-2',
+                parent: 'obj1',
+                info: 'Estado de carga da bateria b no tempo t.'
+            },
+            {
+                id: 'obj6',
+                text: 'zwitch(b,t)',
+                x: -50,
+                y: -380,
+                level: 'level-2',
+                color: 'accent-2',
+                parent: 'obj1',
+                info: 'Variável binária: 1=carregando, 0=descarregando.'
+            },
+            {
+                id: 'obj7',
+                text: 'Restrições',
+                x: 150,
+                y: -300,
+                level: 'level-1',
+                color: 'accent-2',
+                parent: 'central',
+                info: 'Regras que as variáveis devem respeitar: balanço, capacidade, lógica.'
+            },
+            {
+                id: 'obj8',
+                text: 'Balanço Potência',
+                x: 150,
+                y: -420,
+                level: 'level-2',
+                color: 'accent-2',
+                parent: 'obj7',
+                info: 'Oferta = Demanda: flowout - flowin + solar + grid = demand.'
+            },
+            {
+                id: 'obj9',
+                text: 'Estado Bateria',
+                x: 280,
+                y: -420,
+                level: 'level-2',
+                color: 'accent-2',
+                parent: 'obj7',
+                info: 'state(t) = state(t-1) + flowin - flowout.'
+            },
+            {
+                id: 'obj10',
+                text: 'Lógica Carga/Descarga',
+                x: 150,
+                y: -380,
+                level: 'level-2',
+                color: 'accent-2',
+                parent: 'obj7',
+                info: 'Não pode carregar e descarregar simultaneamente (via zwitch).'
+            },
+
+            // Evolução Complexidade
+            {
+                id: 'evo1',
+                text: 'Linear/Inteiro (201)',
+                x: 400,
+                y: -200,
+                level: 'level-1',
+                color: 'accent-3',
+                parent: 'central',
+                info: 'Programação linear e inteira mista para otimização de energia.'
+            },
+            {
+                id: 'evo2',
+                text: 'Não-Linear (202)',
+                x: 400,
+                y: -100,
+                level: 'level-1',
+                color: 'accent-3',
+                parent: 'central',
+                info: 'Regressão não-linear (Michaelis-Menten), objetivos quadráticos.'
+            },
+            {
+                id: 'evo3',
+                text: 'PWL (202)',
+                x: 620,
+                y: -100,
+                level: 'level-2',
+                color: 'accent-3',
+                parent: 'evo2',
+                info: 'Piecewise Linear: aproximar relações não-lineares com segmentos.'
+            },
+            {
+                id: 'evo4',
+                text: 'Incerteza (202)',
+                x: 400,
+                y: 0,
+                level: 'level-1',
+                color: 'accent-3',
+                parent: 'central',
+                info: 'Lidar com incerteza: Monte Carlo, chance constraints, cenários.'
+            },
+            {
+                id: 'evo5',
+                text: 'Monte Carlo',
+                x: 620,
+                y: -30,
+                level: 'level-2',
+                color: 'accent-3',
+                parent: 'evo4',
+                info: 'Simular múltiplos cenários de custo/demanda para avaliar robustez.'
+            },
+            {
+                id: 'evo6',
+                text: 'Chance Constraints',
+                x: 620,
+                y: 20,
+                level: 'level-2',
+                color: 'accent-3',
+                parent: 'evo4',
+                info: 'Garantir que restrições sejam atendidas com probabilidade definida.'
+            },
+
+            // Conceitos Teóricos
+            {
+                id: 'teo1',
+                text: 'Multi-Objetivo',
+                x: -150,
+                y: 200,
+                level: 'level-1',
+                color: 'accent-4',
+                parent: 'central',
+                info: 'Otimizar múltiplos objetivos: custo, independência energética, saúde bateria.'
+            },
+            {
+                id: 'teo2',
+                text: 'Pesos',
+                x: -280,
+                y: 300,
+                level: 'level-2',
+                color: 'accent-4',
+                parent: 'teo1',
+                info: 'Combinar objetivos com pesos: w1*cost + w2*grid.'
+            },
+            {
+                id: 'teo3',
+                text: 'Hierárquico',
+                x: -150,
+                y: 320,
+                level: 'level-2',
+                color: 'accent-4',
+                parent: 'teo1',
+                info: 'Priorizar objetivos: custo > profundidade descarga > grid.'
+            },
+            {
+                id: 'teo4',
+                text: 'Saúde Bateria',
+                x: 150,
+                y: 200,
+                level: 'level-1',
+                color: 'accent-4',
+                parent: 'central',
+                info: 'Controlar profundidade de descarga para prolongar vida útil.'
+            },
+            {
+                id: 'teo5',
+                text: 'Depth of Discharge',
+                x: 150,
+                y: 320,
+                level: 'level-2',
+                color: 'accent-4',
+                parent: 'teo4',
+                info: 'Variável binária: state < 0.3*capacity = descarga profunda.'
+            },
+            {
+                id: 'teo6',
+                text: 'Cenários',
+                x: -50,
+                y: 200,
+                level: 'level-1',
+                color: 'accent-4',
+                parent: 'central',
+                info: 'Modelar múltiplos futuros possíveis (solar, demanda, preço).'
+            },
+            {
+                id: 'teo7',
+                text: 'Modificar Vars/Constrs',
+                x: -50,
+                y: 320,
+                level: 'level-2',
+                color: 'accent-4',
+                parent: 'teo6',
+                info: 'Alterar limites e RHS sem reconstruir modelo: var.ScenN.UB.'
+            },
+
+            // Casos Reais
+            {
+                id: 'caso1',
+                text: 'Back for More Sun',
+                x: 150,
+                y: 100,
+                level: 'level-1',
+                color: 'accent-5',
+                parent: 'central',
+                info: 'Caso principal: otimizar 6 dias com solar + 2 baterias vs. demanda.'
+            },
+            {
+                id: 'caso2',
+                text: '6 dias, 30min',
+                x: 320,
+                y: 100,
+                level: 'level-2',
+                color: 'accent-5',
+                parent: 'caso1',
+                info: 'Período de otimização: 6 dias com intervalos de 30 minutos.'
+            },
+            {
+                id: 'caso3',
+                text: '2 Baterias',
+                x: 320,
+                y: 150,
+                level: 'level-2',
+                color: 'accent-5',
+                parent: 'caso1',
+                info: 'Diferentes capacidades e eficiências para cada bateria.'
+            },
+            {
+                id: 'caso4',
+                text: 'ESUPS',
+                x: 400,
+                y: 250,
+                level: 'level-1',
+                color: 'accent-5',
+                parent: 'central',
+                info: 'Emergency Supply Prepositioning Strategy: suprimentos emergência.'
+            },
+            {
+                id: 'caso5',
+                text: 'Cenários Probabilísticos',
+                x: 620,
+                y: 220,
+                level: 'level-2',
+                color: 'accent-5',
+                parent: 'caso4',
+                info: 'Múltiplos desastres potenciais com probabilidades.'
+            },
+            {
+                id: 'caso6',
+                text: 'Alocação Recursos',
+                x: 620,
+                y: 280,
+                level: 'level-2',
+                color: 'accent-5',
+                parent: 'caso4',
+                info: 'Decidir quanto armazenar em cada local para resposta ótima.'
+            },
+
+            // Aplicações
+            {
+                id: 'app1',
+                text: 'Microgrids',
+                x: -400,
+                y: 150,
+                level: 'level-1',
+                color: 'accent-6',
+                parent: 'central',
+                info: 'Gestão de redes isoladas com renováveis e armazenamento.'
+            },
+            {
+                id: 'app2',
+                text: 'Smart Home',
+                x: -400,
+                y: 220,
+                level: 'level-1',
+                color: 'accent-6',
+                parent: 'central',
+                info: 'Agendar aparelhos e bateria para minimizar custos.'
+            },
+            {
+                id: 'app3',
+                text: 'EV Charging',
+                x: -400,
+                y: 290,
+                level: 'level-1',
+                color: 'accent-6',
+                parent: 'central',
+                info: 'Carregamento veículos elétricos baseado em preço e renováveis.'
+            }
+        ];
+
+        const canvas = document.getElementById('canvas');
+        const container = document.getElementById('container');
+        let scale = 1;
+        let translateX = 0;
+        let translateY = 0;
+        let isDragging = false;
+        let startX, startY;
+
+        // Create nodes
+        nodes.forEach(node => {
+            const div = document.createElement('div');
+            div.className = `node ${node.level} color-${node.color}`;
+            div.innerHTML = node.text;
+            div.style.left = node.x + 'px';
+            div.style.top = node.y + 'px';
+            div.dataset.id = node.id;
+            div.dataset.info = node.info;
+            
+            div.addEventListener('click', () => {
+                const info = document.getElementById('info');
+                info.querySelector('h3').textContent = node.text.replace('<br>', ' ');
+                info.querySelector('p').textContent = node.info;
+                info.classList.add('active');
+            });
+            
+            canvas.appendChild(div);
+        });
+
+        // Draw connections
+        nodes.forEach(node => {
+            if (node.parent) {
+                const parent = nodes.find(n => n.id === node.parent);
+                if (parent) {
+                    const line = document.createElement('div');
+                    line.className = 'connection';
+                    
+                    const dx = node.x - parent.x;
+                    const dy = node.y - parent.y;
+                    const length = Math.sqrt(dx * dx + dy * dy);
+                    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+                    
+                    line.style.width = length + 'px';
+                    line.style.left = parent.x + 'px';
+                    line.style.top = parent.y + 'px';
+                    line.style.transform = `rotate(${angle}deg)`;
+                    
+                    canvas.appendChild(line);
+                }
+            }
+        });
+
+        // Pan and zoom
+        container.addEventListener('mousedown', (e) => {
+            if (e.target === container || e.target === canvas) {
+                isDragging = true;
+                startX = e.clientX - translateX;
+                startY = e.clientY - translateY;
+                container.classList.add('grabbing');
+            }
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (isDragging) {
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                updateTransform();
+            }
+        });
+
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+            container.classList.remove('grabbing');
+        });
+
+        container.addEventListener('wheel', (e) => {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            scale *= delta;
+            scale = Math.max(0.3, Math.min(scale, 3));
+            updateTransform();
+        });
+
+        function updateTransform() {
+            canvas.style.transform = `translate(calc(-50% + ${translateX}px), calc(-50% + ${translateY}px)) scale(${scale})`;
+        }
+
+        function resetView() {
+            scale = 1;
+            translateX = 0;
+            translateY = 0;
+            updateTransform();
+        }
+
+        function toggleInfo() {
+            const info = document.getElementById('info');
+            if (info.classList.contains('active')) {
+                info.classList.remove('active');
+            } else {
+                info.querySelector('h3').textContent = 'Navegação';
+                info.querySelector('p').innerHTML = '• Arraste para mover o mapa<br>• Role para zoom in/out<br>• Clique nos nós para detalhes<br>• Navegue pelos conceitos interconectados';
+                info.classList.add('active');
+            }
+        }
+
+        // Initial position
+        updateTransform();
+    </script>
+</body>
+</html>
+
