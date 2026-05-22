@@ -6,6 +6,47 @@
 A organização abaixo explicita **qual parte do código responde a cada item metodológico exigido para registro formal, versionamento e fundamentação científica**.
 
 ---
+# Sumário
+Os itens exigidos para registro formal, versionamento e fundamentação científica estão explícitos na estrutura apresentada no arquivo Versionamento_vers1_2.md, que faz a correspondência entre partes do código e os critérios científicos/metodológicos relevantes. Com base no documento, esses itens são:
+
+### 1. Caracterização do Sistema Energético  
+- Tipo de sistema (por exemplo: microgrid conectada à rede)
+
+### 2. Horizonte Temporal e Tipo de Operação  
+- Definição do horizonte de tempo (ex: operação diária, modelo determinístico)
+- Resolução temporal utilizada
+
+### 3. Natureza da Função Objetivo  
+- Quais são os critérios de otimização? (ex: minimização de custo, energia importada, etc.)
+
+### 4. Modelagem do BESS (Battery Energy Storage System)  
+- Dinâmica do estado de carga (SOC)
+- Limites operacionais
+- Exclusividade entre carga e descarga
+- Modelagem simplificada ou complexa de degradação
+- Outros aspectos relevantes para o armazenamento
+
+### 5. Modelagem da Demanda EV (Veículo Elétrico)  
+- Como o perfil de demanda é representado? (determinístico, agregado, estocástico, etc.)
+
+### 6. Restrição Contratual de Potência  
+- Limites de potência contratada ou fornecida à rede
+
+### 7. Tipo de Formulação Matemática  
+- Identificação do tipo de problema (ex: MILP—Mixed Integer Linear Programming)
+- Solver utilizado
+
+### 8. Elementos Ausentes (Lacunas para Evolução)  
+- Quais aspectos ainda não são tratados/modelados e podem ser evoluídos
+
+### 9. Correspondência Entre Código e Itens Científicos  
+- Tabela ou mapa explicitando onde cada item acima está concretamente implementado no código
+
+### 10. Conclusão Técnica  
+- Análise se o código atende aos critérios necessários para registro científico e se pode ser versionado formalmente
+
+Esses itens organizam o processo de documentação, facilitando tanto o registro formal do modelo quanto a rastreabilidade das versões e a fundamentação teórico-científica.
+---
 
 # 1. Caracterização do Sistema Energético
 
