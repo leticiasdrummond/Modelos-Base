@@ -1,6 +1,5 @@
-A seguir é apresentada a **compilação estruturada do código do anexo**, organizada conforme os itens necessários para caracterização científica, seleção bibliográfica e evolução do modelo.
+# Mapeamento_Estrutura_Modelo
 
-O conteúdo foi extraído do arquivo:
 
 📁 *Códigos de Caso Eletroposto com BESS.md* 
 
@@ -270,9 +269,20 @@ O código do anexo já fornece base clara para:
 * Identificação objetiva das lacunas para publicação.
 
 ---
+# ! Dica de uso:
 
-Se desejar, posso agora:
+**Explicação de como esse tipo de arquivo se insere em demais repositórios:**
 
-* Mapear cada lacuna a grupos específicos de artigos recomendados;
-* Propor versão v3.0 com dimensionamento do BESS;
-* Estruturar matriz formal “Melhoria → Fundamentação → Alteração matemática → Impacto esperado”.
+Arquivos como esse servem como “documentação estruturante” do modelo computacional, conectando explicitamente o código às exigências metodológicas de pesquisa científica e registro formal. Eles cumprem funções estratégicas:
+
+- **Registro formal:** Documentam, de forma rastreável e padronizada, a estrutura lógica-matemática do modelo, facilitando auditoria, certificação e reprodutibilidade.
+- **Versionamento científico:** Permitem identificar quais trechos do código correspondem a diferentes versões do modelo (ex: v1, v2, v3), facilitando comparação evolutiva e justificando melhorias implementadas.
+- **Fundamentação para publicações:** Servem de referência direta para artigos, dissertações, relatórios técnicos e requisitos de projetos de pesquisa.
+- **Comunicação interdisciplinar:** Tornam o modelo compreensível por avaliadores, parceiros e revisores independentemente do domínio de especialidade.
+- **Integração com outros repositórios:**  
+    - Podem ser usados como referência cruzada, mostrando em cada repositório quais elementos do código respondem a cada exigência científica de maneira clara e transferível.
+    - Em repositórios derivados/afins (como cenariosEVCS), ajudam a manter o vínculo metodológico e justificar adaptações específicas do modelo base, promovendo transparência na customização.
+    - Facilitam a integração e comparação entre repositórios distintos, mostrando de forma clara quais hipóteses/modelagens estão presentes, ausentes ou modificadas em cada caso.
+
+**Resumo:**  
+Inclua esse tipo de arquivo na raiz do repositório (ao lado do README), com nome padronizado e referência à versão do modelo. Em projetos derivados, utilize o arquivo para explicitar adaptações, justificativas e manter o elo documental com o repositório base/original. Isso valoriza o rigor metodológico, a rastreabilidade e o potencial reprodutivo/colaborativo do seu trabalho.
