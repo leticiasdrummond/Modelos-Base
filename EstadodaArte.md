@@ -122,8 +122,7 @@ A metodologia evolui em **modelos incrementais**, inspirados nos exemplos de *Ba
 - **Battery Scheduling**: base para dinâmica SOC, arbitragem e custo.
 - **Energy Storage/Power Flow examples**: úteis para extensão com PV e limites de rede.
 
-**Metáforas corretas**:
-- “Load” no exemplo Gurobi = **demanda total do eletroposto** (EV + carga base).
+**Metáforas corretas**:” no exemplo Gurobi = **demanda total do eletroposto** (EV + carga base).
 - “Arbitrage” = **otimização econômica + garantia de atendimento**.
 - “Battery degradation” = custo por throughput (aproximação linear).
 - “Grid” = rede com limite e falhas de disponibilidade.
@@ -137,7 +136,8 @@ A metodologia evolui em **modelos incrementais**, inspirados nos exemplos de *Ba
 3. **Metodologia** (modelos 1–4)
 4. **Estudo de Caso**
 5. **Resultados e Discussão**
-6. **Conclusões e Trabalhos Futuros**
+6. **Conclusões e Tr
+- “Loadabalhos Futuros**
 
 ---
 
@@ -149,7 +149,3 @@ Este documento é um ponto de partida para organizar a revisão de literatura e 
 - histórico de falhas,
 - e dimensionamento preliminar do BESS.
 
-Caso deseje, posso:
-- inserir referências bibliográficas formais (ABNT/IEEE),
-- adicionar figuras de fluxograma do modelo,
-- ou preparar os modelos matemáticos em LaTeX.
