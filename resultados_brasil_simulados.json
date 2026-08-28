@@ -1,0 +1,15 @@
+{
+  "stations": 5.0,
+  "charging_points": 20.0,
+  "pv_kwp": 375.0,
+  "battery_kwh": 0.0,
+  "total_investment_rs": 6320000.0,
+  "npv_rs": 5661673.02,
+  "selected_station_codes": [
+    "C01",
+    "C04",
+    "C06",
+    "C08",
+    "C10"
+  ]
+}

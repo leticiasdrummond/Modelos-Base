@@ -1,0 +1,88 @@
+# Dados de entrada para modelo Pyomo de alocação ótima de eletropostos rápidos
+# Contexto: corredor Campinas - Ribeirão Preto - Franca - Divisa MG
+# Rodovias: SP-348 (Bandeirantes) e SP-330 (Anhanguera)
+# Valores monetários: R$ de 2024. Uso acadêmico; validar com fornecedores em projeto executivo.
+
+set TRECHOS := T01 T02 T03 T04 T05 T06 T07 T08 T09 T10 T11 T12 T13 T14 T15;
+set CANDIDATOS := C01 C02 C03 C04 C05 C06 C07 C08 C09 C10;
+set SUBESTACOES := SE01 SE02 SE03 SE04 SE05 SE06 SE07 SE08 SE09 SE10;
+set PERIODOS := MADRUGADA MANHA MEIO_DIA PONTA NOITE FIM_NOITE;
+
+param distancia_km :=
+T01 45 T02 48 T03 52 T04 44 T05 50
+T06 46 T07 55 T08 51 T09 47 T10 49
+T11 54 T12 45 T13 50 T14 48 T15 56;
+
+param fluxo_veiculos_dia :=
+T01 52000 T02 50000 T03 47000 T04 43000 T05 39000
+T06 36000 T07 34000 T08 32000 T09 30000 T10 28000
+T11 26000 T12 24000 T13 22000 T14 20000 T15 18000;
+
+param candidatos_lat_lon: latitude longitude km_corredor :=
+C01 -22.9056 -47.0608 0
+C02 -22.7400 -47.3300 55
+C03 -22.5800 -47.5200 110
+C04 -22.3600 -47.3800 170
+C05 -22.1500 -47.0400 230
+C06 -21.7800 -47.0900 310
+C07 -21.4700 -47.0100 390
+C08 -21.1800 -47.8100 475
+C09 -20.7100 -47.8900 585
+C10 -20.5300 -47.4000 700;
+
+param demanda_media_kwh_dia :=
+C01 860 C02 810 C03 760 C04 700 C05 640
+C06 590 C07 540 C08 500 C09 450 C10 410;
+
+param distancia_subestacao_km :=
+C01 2.0 C02 3.5 C03 4.0 C04 2.8 C05 5.0
+C06 3.0 C07 4.8 C08 3.7 C09 4.2 C10 5.5;
+
+param capacidade_rede_kw :=
+C01 950 C02 900 C03 850 C04 780 C05 720
+C06 700 C07 650 C08 620 C09 580 C10 540;
+
+param tarifa_energia_rs_kwh :=
+MADRUGADA 0.52
+MANHA 0.68
+MEIO_DIA 0.55
+PONTA 1.42
+NOITE 0.72
+FIM_NOITE 0.58;
+
+param participacao_demanda :=
+MADRUGADA 0.08
+MANHA 0.22
+MEIO_DIA 0.30
+PONTA 0.18
+NOITE 0.14
+FIM_NOITE 0.08;
+
+param potencia_carregador_kw := 60;
+param pontos_por_estacao := 4;
+param capacidade_bateria_ve_kwh := 55;
+param autonomia_real_km := 280;
+param soc_minimo := 0.20;
+param soc_alvo := 0.80;
+param eficiencia_carregamento := 0.93;
+
+param custo_estacao_fixo_rs := 600000;
+param custo_carregador_rs := 60000;
+param custo_conexao_rs_km := 85000;
+param custo_pv_rs_kwp := 5000;
+param custo_bateria_rs_kwh := 2600;
+param custo_om_percentual_ano := 0.035;
+
+param pv_max_kwp := 150;
+param bateria_max_kwh := 500;
+param irradiacao_media_kwh_m2_dia := 5.1;
+param fator_capacidade_pv := 0.18;
+param eficiencia_bateria := 0.90;
+
+param tensao_min_pu := 0.93;
+param tensao_max_pu := 1.05;
+param fator_potencia_min := 0.92;
+param taxa_desconto := 0.10;
+param horizonte_anos := 8;
+param crescimento_demanda_ano := 0.12;
+param preco_recarga_rs_kwh := 2.20;
