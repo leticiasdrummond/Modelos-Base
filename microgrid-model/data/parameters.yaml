@@ -1,0 +1,97 @@
+time_periods: [0, 1, 2, 3]
+scenarios: [s0]
+contingencies: [c0]
+evs: [ev1, ev2]
+
+discount_rate: 0.08
+years: 1
+
+epsilon:
+  ghg_max: 5000
+  idle_max: 6
+
+probability_s:
+  s0: 1.0
+
+probability_c:
+  c0: 1.0
+
+contingency_window:
+  c0: [1, 1]
+
+base_load:
+  0: 60
+  1: 70
+  2: 75
+  3: 65
+
+pv_factor:
+  s0:
+    0: 0.0
+    1: 0.6
+    2: 0.8
+    3: 0.2
+
+price_import:
+  0: 0.30
+  1: 0.35
+  2: 0.40
+  3: 0.32
+
+price_export:
+  0: 0.12
+  1: 0.12
+  2: 0.12
+  3: 0.12
+
+capex:
+  pv_per_kw: 900
+  bess_per_kwh: 350
+  tg_per_kw: 420
+  evcs_per_unit: 1400
+
+om:
+  tg_per_kwh: 0.22
+  bess_cycle_per_kwh: 0.01
+
+emissions:
+  grid_per_kwh: 0.35
+  tg_per_kwh: 0.75
+
+ev:
+  arrival:
+    ev1: 0
+    ev2: 1
+  departure:
+    ev1: 3
+    ev2: 3
+  soc_init:
+    ev1: 8
+    ev2: 6
+  soc_target:
+    ev1: 10
+    ev2: 8
+  emax:
+    ev1: 12
+    ev2: 10
+  pmax_charge:
+    ev1: 4
+    ev2: 3
+  pmax_discharge:
+    ev1: 4
+    ev2: 3
+
+limits:
+  tg_max: 120
+  bess_charge_max: 40
+  bess_discharge_max: 40
+  bess_emax_max: 200
+  grid_import_max: 300
+  grid_export_max: 300
+  unserved_load_cost: 2.5
+
+initial_states:
+  bess_soc: 0
+
+big_m:
+  pv_curtailment: 10000
